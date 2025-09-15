@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from schemas import CreateHero, ReadHero
+from schemas import CreateHero, ReadHero, UpdateHero
 from typing import Annotated
 from database import get_session
 from sqlmodel import Session
@@ -23,3 +23,17 @@ def read(session:SessionDep, hero_id:int):
     if not hero:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no hero with this id")
     return hero
+
+@router.patch("/{hero_id}", response_model=ReadHero)
+def update(session:SessionDep, hero_id:int, hero_update:UpdateHero):
+    updated =  crud.update_hero(session, hero_id, hero_update)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Can not update")
+    return updated
+
+@router.delete("/{hero_id}")
+def delete(session:SessionDep, hero_id:int):
+    deleted =  crud.delete_hero(session, hero_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Can not delete")
+    return {"ok": True}
